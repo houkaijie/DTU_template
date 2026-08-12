@@ -1,0 +1,18 @@
+{
+  "name": "dtu-platform-server",
+  "version": "1.0.0",
+  "description": "DTU配置平台后端服务 - 物联网设备管理/IoT云平台接入",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "dev": "node app.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.19.2",
+    "jsonwebtoken": "^9.0.2",
+    "mqtt": "^5.10.1",
+    "svg-captcha": "^1.4.0",
+    "uuid": "^9.0.1"
+  }
+}
