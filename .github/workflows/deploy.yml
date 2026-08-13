@@ -31,9 +31,10 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      # 注意: --openssl-legacy-provider 是 Node 17+ 才支持的参数, Node 16 直接报
+      # "not allowed in NODE_OPTIONS"。本项目用 Node 16 构建无需该参数。
       - name: Build
         env:
-          NODE_OPTIONS: --openssl-legacy-provider
           VUE_APP_PUBLIC_PATH: './'
         run: npm run build:prod
 
