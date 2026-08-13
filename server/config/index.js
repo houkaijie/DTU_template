@@ -23,5 +23,12 @@ module.exports = {
   deviceOfflineSeconds: 120,
 
   // 文件上传/导出目录
-  exportDir: path.join(__dirname, '../data/export')
+  exportDir: path.join(__dirname, '../data/export'),
+
+  // 流量查询 — 公司云平台接入配置 (接口确定后填入 baseUrl/apiKey, 自动从本地模拟切换为真实数据)
+  flowApi: {
+    baseUrl: '',  // 例如: 'https://api.company.com/iot/flow' (TODO: 待公司云平台确定)
+    apiKey: '',   // 云平台分配的密钥
+    timeout: 10000
+  }
 }

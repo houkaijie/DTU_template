@@ -24,6 +24,7 @@ app.use('/static/export', express.static(config.exportDir, { fallthrough: false 
 app.use('/api', require('./routes/auth'))       // 认证/用户
 app.use('/api/device', require('./routes/device')) // 设备
 app.use('/api/group', require('./routes/group'))  // 分组
+app.use('/api/flow', require('./routes/flow'))    // 流量查询 (SIM/ICCID)
 app.use('/iot/api', require('./routes/iot'))     // IoT 设备接入
 
 // 健康检查

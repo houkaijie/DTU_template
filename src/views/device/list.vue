@@ -79,15 +79,20 @@
       @success="onRefresh"
     />
 
-    <!-- 卡状态: 查看物联网卡诊断信息 -->
-    <el-dialog title="卡状态" :visible.sync="showIccid" width="70%">
-      <iframe
-        v-if="showIccid"
-        :src="cardUrl"
-        width="100%"
-        height="600"
-        style="border:none;"
-      />
+    <!-- 卡状态: 通过本平台流量查询接口获取 (不再内嵌第三方卡商页面) -->
+    <el-dialog title="卡状态" :visible.sync="showIccid" width="60%">
+      <div v-loading="cardLoading">
+        <template v-if="cardInfo">
+          <el-table :data="cardRows" size="small" border style="width: 100%">
+            <el-table-column prop="label" label="项目" width="160" />
+            <el-table-column prop="value" label="内容" />
+          </el-table>
+          <p v-if="cardInfo.source === 'mock'" class="mock-tip">
+            模拟数据 — 公司云平台接入后为实时数据
+          </p>
+        </template>
+        <div v-else-if="!cardLoading" class="no-data">未获取到卡信息</div>
+      </div>
     </el-dialog>
   </div>
 </template>
@@ -96,6 +101,7 @@
 import { mapGetters } from 'vuex'
 import VTable from '@/components/VTable'
 import { deviceList, removeDevice, exportDeviceList } from '@/api/device' // eslint-disable-line no-unused-vars
+import { searchFlow } from '@/api/flow'
 import AddDialog from './components/AddDialog'
 import TransferDialog from './components/TransferDialog'
 import ChangeGroupDialog from './components/ChangeGroupDialog'
@@ -107,6 +113,8 @@ export default {
     return {
       showIccid: false,
       iccid: undefined,
+      cardInfo: undefined,
+      cardLoading: false,
       transferDevice: null,
       groupDevice: null,
       openTransfer: false,
@@ -123,8 +131,17 @@ export default {
     isAdmin() {
       return Number(this.userInfo.role) === 1
     },
-    cardUrl() {
-      return 'http://weixin.tibiot.com:8081/cardDiagnosis?token=B5CB01AE4CE9FC4E4155413E8DD29B2D&iccid=' + this.iccid
+    cardRows() {
+      if (!this.cardInfo) return []
+      return [
+        { label: 'ICCID', value: this.cardInfo.cardNo },
+        { label: '运营商', value: this.cardInfo.operator },
+        { label: '套餐', value: this.cardInfo.package },
+        { label: '已用流量', value: this.cardInfo.usedMB + ' MB' },
+        { label: '剩余流量', value: this.cardInfo.remainMB + ' MB' },
+        { label: '状态', value: this.cardInfo.status },
+        { label: '到期时间', value: this.cardInfo.expireDate }
+      ]
     }
   },
   methods: {
@@ -135,6 +152,12 @@ export default {
     onShowIccid(iccid) {
       this.iccid = iccid
       this.showIccid = true
+      this.cardInfo = undefined
+      this.cardLoading = true
+      searchFlow({ cardNo: iccid })
+        .then(res => { this.cardInfo = res.data })
+        .catch(() => { this.cardInfo = undefined })
+        .finally(() => { this.cardLoading = false })
     },
     onExport() {
       this.$confirm('确定导出当前设备?').then(() => {
@@ -194,5 +217,18 @@ export default {
     padding: 15px;
     border-radius: 4px;
   }
+}
+
+.mock-tip {
+  margin: 10px 0 0;
+  font-size: 12px;
+  color: #909399;
+}
+
+.no-data {
+  padding: 30px 0;
+  text-align: center;
+  color: #909399;
+  font-size: 14px;
 }
 </style>
