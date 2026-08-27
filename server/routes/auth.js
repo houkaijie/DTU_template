@@ -146,17 +146,18 @@ router.get('/dashboard/stats', auth, (req, res) => {
   `).get(...params).c
   // 最近7天心跳趋势
   const trend = db.prepare(`
-    SELECT date(created_at) AS day, COUNT(*) AS cnt
+    SELECT date(h.created_at) AS day, COUNT(*) AS cnt
     FROM device_heartbeats h
     ${isAdmin ? '' : 'JOIN devices d ON d.id = h.device_id AND d.user_id = ?'}
     WHERE h.created_at > datetime('now', '-6 day')
-    GROUP BY date(created_at) ORDER BY day
+    GROUP BY date(h.created_at) ORDER BY day
   `).all(...params)
   // 最近上线设备
+  const recentWhere = isAdmin ? '' : ' WHERE d.user_id = ?'
   const recent = db.prepare(`
     SELECT d.id, d.imei, d.csq, d.ver, d.online_time, g.group_name
     FROM devices d LEFT JOIN groups g ON g.id = d.group_id
-    ${where}
+    ${recentWhere}
     ORDER BY d.online_time IS NULL, d.online_time DESC LIMIT 10
   `).all(...params)
   ok(res, {
